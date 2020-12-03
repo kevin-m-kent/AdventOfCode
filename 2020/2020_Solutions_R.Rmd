@@ -76,3 +76,42 @@ data %>%
   summarise(sum(valid))
 ```
 
+# Day 3
+
+## Part 1 & 2
+
+```{r}
+
+data <- read_lines(here::here("2020", "Inputs", "day_3.txt")) %>%
+  as.data.frame(.) %>%
+  rename(pattern = 1) 
+
+get_counts <- function(slope, rows, data) {
+  
+data %>%
+  slice(rows) %>%
+  mutate(row = row_number()) %>%
+  mutate(position = slope*(row - 1) + 1) %>%
+  mutate(adj_position = position %% 31) %>%
+  mutate(adj_position = case_when(
+    adj_position == 0 ~ 31, 
+    TRUE ~ adj_position
+  ))  %>%
+    mutate(match = str_sub(pattern, adj_position, adj_position)) %>%
+  filter(match == "#") %>%
+  nrow(.)
+ 
+}
+
+slopes <- c(1, 3, 5, 7, 1)
+row_ic <-list(1:nrow(data), 1:nrow(data), 1:nrow(data), 1:nrow(data), seq(1, nrow(data), by  = 2))
+
+prod(map2_int(slopes, row_ic, get_counts, data = data))
+
+```
+
+```{r}
+data %>%
+  slice(c(1, 10, 100))
+```
+
