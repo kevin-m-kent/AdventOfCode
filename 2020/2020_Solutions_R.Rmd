@@ -1,0 +1,49 @@
+---
+title: "Advent of Code Solutions"
+author: "Kevin Kent"
+date: "12/2/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Day 2
+
+## Part 1
+
+```{r}
+library(here)
+library(tidyverse)
+
+data <- read.table(here::here("2020", "Inputs", "day_2.txt"), sep = " ", col.names = c("lower_upper", "letter", "string")) %>%
+  mutate(letter = str_remove_all(letter, ":")) %>%
+  separate(lower_upper, into = c("lower", "upper"), sep = "-") 
+
+data %>%
+  mutate(string = str_extract_all(string, letter)) %>%
+  mutate(length = map(string, ~ length(.))) %>%
+  mutate(valid = case_when(
+    as.numeric(length) >= as.numeric(lower) & as.numeric(length) <= as.numeric(upper) ~ TRUE,
+    TRUE ~ FALSE
+  )) %>%
+  summarise(sum(valid))
+```
+
+## Part 2
+
+```{r}
+data %>%
+  mutate(lower = as.numeric(lower),
+         upper = as.numeric(upper)) %>%
+  mutate(string_first = substr(string, lower, lower), 
+         string_second = substr(string, upper, upper)) %>%
+  mutate(valid = case_when(
+    string_first == letter & string_second ==  letter ~ FALSE,
+    string_first == letter | string_second == letter ~ TRUE,
+    TRUE ~ FALSE
+  )) %>%
+  summarise(sum(valid))
+```
+
