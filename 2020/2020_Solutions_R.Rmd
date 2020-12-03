@@ -9,6 +9,35 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Day 1
+
+# Part 1
+
+```{r}
+library(here)
+library(tidyverse)
+
+data <- read.table(here::here("2020", "Inputs", "day_1.txt"))
+
+diffs <- 2020 - data$V1 
+
+data %>%
+  filter(V1 %in%  diffs) %>%
+  prod(.)
+
+```
+
+# Part 2
+
+```{r}
+expand.grid(data$V1, data$V1) %>%
+  filter((Var1 + Var2) %in% diffs) %>%
+  select(Var1) %>%
+  distinct() %>%
+  prod(.)
+```
+
+
 # Day 2
 
 ## Part 1
