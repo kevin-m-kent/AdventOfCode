@@ -1,22 +1,34 @@
----
-title: "Advent of Code Solutions"
-author: "Kevin Kent"
-date: "12/2/2020"
-output: rmarkdown::github_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+Advent of Code Solutions
+================
+Kevin Kent
+12/2/2020
 
 # Day 1
 
 # Part 1
 
-```{r}
+``` r
 library(here)
-library(tidyverse)
+```
 
+    ## here() starts at /Users/kevinkent/Documents/AdventOfCode
+
+``` r
+library(tidyverse)
+```
+
+    ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──
+
+    ## ✓ ggplot2 3.3.2     ✓ purrr   0.3.4
+    ## ✓ tibble  3.0.4     ✓ dplyr   1.0.2
+    ## ✓ tidyr   1.1.2     ✓ stringr 1.4.0
+    ## ✓ readr   1.4.0     ✓ forcats 0.5.0
+
+    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+    ## x dplyr::filter() masks stats::filter()
+    ## x dplyr::lag()    masks stats::lag()
+
+``` r
 data <- read.table(here::here("2020", "Inputs", "day_1.txt"))
 
 diffs <- 2020 - data$V1 
@@ -24,12 +36,13 @@ diffs <- 2020 - data$V1
 data %>%
   filter(V1 %in%  diffs) %>%
   prod(.)
-
 ```
+
+    ## [1] 692916
 
 # Part 2
 
-```{r}
+``` r
 expand.grid(data$V1, data$V1) %>%
   filter((Var1 + Var2) %in% diffs) %>%
   select(Var1) %>%
@@ -37,12 +50,13 @@ expand.grid(data$V1, data$V1) %>%
   prod(.)
 ```
 
+    ## [1] 289270976
 
 # Day 2
 
 ## Part 1
 
-```{r}
+``` r
 library(here)
 library(tidyverse)
 
@@ -60,9 +74,12 @@ data %>%
   summarise(sum(valid))
 ```
 
+    ##   sum(valid)
+    ## 1        447
+
 ## Part 2
 
-```{r}
+``` r
 data %>%
   mutate(lower = as.numeric(lower),
          upper = as.numeric(upper)) %>%
@@ -76,12 +93,14 @@ data %>%
   summarise(sum(valid))
 ```
 
+    ##   sum(valid)
+    ## 1        249
+
 # Day 3
 
 ## Part 1 & 2
 
-```{r}
-
+``` r
 data <- read_lines(here::here("2020", "Inputs", "day_3.txt")) %>%
   as.data.frame(.) %>%
   rename(pattern = 1) 
@@ -107,12 +126,13 @@ slopes <- c(1, 3, 5, 7, 1)
 row_ic <-list(1:nrow(data), 1:nrow(data), 1:nrow(data), 1:nrow(data), seq(1, nrow(data), by  = 2))
 
 prod(map2_int(slopes, row_ic, get_counts, data = data))
-
 ```
+
+    ## [1] 4385176320
 
 # Day 4
 
-```{r}
+``` r
 data <- read_file(here::here("2020", "Inputs", "day_4.txt")) %>%
   as.data.frame(.) %>%
   rename(pattern = 1) %>%
@@ -131,12 +151,23 @@ data <- read_file(here::here("2020", "Inputs", "day_4.txt")) %>%
          hgt = str_extract(hgt, "[0-9]+")) %>%
   mutate(hgt = as.numeric(hgt)) %>%
     filter(num_valid == 7) 
+```
 
+    ## Warning: Expected 2 pieces. Missing pieces filled with `NA` in 1 rows [2098].
+
+``` r
 # part 1
 
 data %>%
   count()
+```
 
+    ## # A tibble: 1 x 1
+    ##       n
+    ##   <int>
+    ## 1   256
+
+``` r
 # part 2
 
 data %>%
@@ -151,11 +182,14 @@ data %>%
   count()
 ```
 
+    ## # A tibble: 1 x 1
+    ##       n
+    ##   <int>
+    ## 1   198
+
 # Day 5
 
-```{r}
-
-
+``` r
 data <- read_lines(here::here("2020", "Inputs", "day_5.txt"))
 
 num_cols <- 8
@@ -205,11 +239,12 @@ get_id <- function(row, col) {
  ids  <- map2_dbl(rows, cols, ~ get_id(.x, .y))
  
  max(ids)
- 
- which(!seq(0:858)  %in% ids)
-
- 
-
 ```
 
+    ## [1] 871
 
+``` r
+ which(!seq(0:858)  %in% ids)
+```
+
+    ##  [1]   1   2   3   4   5   6   7   8   9  10  11 640
