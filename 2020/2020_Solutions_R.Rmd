@@ -151,4 +151,80 @@ data %>%
   count()
 ```
 
+# Day 5
+
+```{r}
+
+
+data <- read_lines(here::here("2020", "Inputs", "day_5.txt"))
+
+num_cols <- 8
+num_rows <- 128
+row_sequence <- 0:(num_rows-1)
+col_sequence <- 0:(num_cols-1)
+
+halve_seq <- function(seat_sequence, string) {
+  
+  curr_indication <- substr(string, 1, 1)
+  
+  string <- substr(string, 2, nchar(string))
+  
+  if ((curr_indication == 'F') | (curr_indication == 'L')) {
+    
+    seat_sequence <- seat_sequence[1:(length(seat_sequence)/2)]
+    
+  } 
+  
+  else {
+    
+    seat_sequence <- seat_sequence[((length(seat_sequence)/2) + 1):length(seat_sequence)]
+    
+  }
+  
+  if (length(seat_sequence) == 1) {
+    
+    seat_sequence
+    
+  }
+  
+  else {
+    
+    halve_seq(seat_sequence, string)
+    
+  }
+  
+}
+
+get_id <- function(row, col) {
+  
+  (row * 8) + col
+  
+}
+
+ rows <- map_int(data, ~ halve_seq(row_sequence, .))
+ cols <- map_int(data, ~ halve_seq(col_sequence, substr(., 8, 10)))
+ ids  <- map2_dbl(rows, cols, ~ get_id(.x, .y))
+ 
+ max(ids)
+ 
+ which(!seq(0:858)  %in% ids)
+
+ 
+ 
+
+```
+
+```{r}
+
+seat_sequence <- 0:127
+ length(seat_sequence[((length(seat_sequence)/2) + 1):length(seat_sequence)])
+  length(seat_sequence <- seat_sequence[1:(length(seat_sequence)/2)])
+    
+  
+  
+test <- "kevin"
+
+substr(test, 1, 1) == 'k'
+```
+
 
