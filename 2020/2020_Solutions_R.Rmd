@@ -166,7 +166,6 @@ col_sequence <- 0:(num_cols-1)
 halve_seq <- function(seat_sequence, string) {
   
   curr_indication <- substr(string, 1, 1)
-  
   string <- substr(string, 2, nchar(string))
   
   if ((curr_indication == 'F') | (curr_indication == 'L')) {
@@ -210,21 +209,7 @@ get_id <- function(row, col) {
  which(!seq(0:858)  %in% ids)
 
  
- 
 
-```
-
-```{r}
-
-seat_sequence <- 0:127
- length(seat_sequence[((length(seat_sequence)/2) + 1):length(seat_sequence)])
-  length(seat_sequence <- seat_sequence[1:(length(seat_sequence)/2)])
-    
-  
-  
-test <- "kevin"
-
-substr(test, 1, 1) == 'k'
 ```
 
 
