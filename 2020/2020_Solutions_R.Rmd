@@ -212,4 +212,46 @@ get_id <- function(row, col) {
 
 ```
 
+# Day 6 
+
+```{r}
+
+data <- read_file(here::here("2020", "Inputs", "day_6.txt")) %>%
+  as.tibble(.) %>%
+  separate_rows(value, sep = "\n\n") %>%
+  mutate(group = row_number()) %>%
+  separate_rows(value, sep = "\n") %>%
+  group_by(group) %>%
+  mutate(person = row_number()) %>%
+  mutate(value = str_trim(value)) %>%
+  ungroup()
+
+# Part 1
+
+data %>%
+  separate_rows(value, sep = "")   %>%
+  filter(value!='') %>%
+  distinct(value, group) %>%
+  count(group) %>%
+  summarise(sum(n))
+
+# Part 2
+
+data %>%
+  group_by(group) %>%
+  mutate(num_people = n()) %>%
+  separate_rows(value, sep = "")   %>%
+  filter(value!='') %>%
+  group_by(group, num_people, value) %>%
+  summarise(letter_counts = n()) %>%
+  ungroup() %>%
+  filter(letter_counts == num_people) %>%
+  distinct(group, value) %>%
+  count(group) %>%
+  summarise(sum(n))
+  
+  
+
+```
+
 
