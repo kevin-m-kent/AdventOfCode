@@ -400,6 +400,8 @@ find_infinite <- function(data, accum = 0, location = 1, visited = c()) {
 # part 1
 
 result_1 <- find_infinite(data)
+
+result_1_names <- data[result_1[[2]]]
   
 
 ```
@@ -420,8 +422,8 @@ nop_to_jmp <- function(string) {
 
 i = 1
 found <- FALSE 
-all_jmps <- which(str_detect(data, "jmp"))
-all_nops <- which(str_detect(data, "nop"))
+all_jmps <- which(str_detect(result_1_names, "jmp"))
+all_nops <- which(str_detect(result_1_names, "nop"))
 
 while (found == FALSE & i <= length(all_nops)) {
   data_mod <- data
@@ -431,6 +433,8 @@ while (found == FALSE & i <= length(all_nops)) {
   i= i + 1
 }
 
+i = 1
+
 while (found == FALSE & i <= length(all_jmps)) {
   data_mod <- data
   data_mod[all_jmps[i]] <- jmp_to_nop(data_mod[all_jmps[[i]]])
@@ -439,4 +443,108 @@ while (found == FALSE & i <= length(all_jmps)) {
   i= i + 1
 }
 ```
+
+# Day 9 
+
+```{r}
+library(here)
+library(tidyverse)
+
+data <- as.numeric(read_lines(here::here("2020", "Inputs", "day_9.txt"))) 
+
+get_begin <- function(curr, diff) {
+  
+  num <- curr - diff 
+  
+  if (num <= 0) {
+    
+    1
+  }
+  
+  else num 
+  
+}
+
+get_cohort <- function(df, curr) {
+  
+  df[get_begin(curr, 25):(curr-1)]
+  
+}
+
+cohorts <- map(seq(26, length(data), by = 1), ~ get_cohort(data, .))
+
+not_found= TRUE
+i = 0
+
+while (not_found) {
+  
+  i = i + 1
+  
+  combos <- expand.grid(cohorts[[i]], cohorts[[i]]) %>%
+    mutate(sums = Var1 + Var2)
+    
+  not_found <- data[i+25] %in% combos$sums
+  
+
+    
+}
+
+# Part 1 
+
+answer <- data[25+i]
+
+# Part 2
+
+remaining_data <- data[1:(i+25-1)]
+
+data_df <- tibble(data = data)
+
+not_found = TRUE
+
+lag_additions <- function(data, number) {
+  
+  start <- length(data) - number
+  
+  sum(data[start:length(data)])
+  
+}
+
+
+data_loop <- data
+
+not_found <- TRUE
+
+lag <- 1
+
+## check and expand sequence until either 1) equal to answer or (break) 2) greater than answer (remove last element, repeat  from lag 1)
+
+while (not_found)  {
+  
+  total <- lag_additions(data_loop, lag)
+
+  if (total ==  answer) {
+  
+      start <- length(data_loop) - lag
+      end <- length(data_loop)
+      segment <- data_loop[start:end]
+      final_total <- sum(c(min(segment), max(segment)))
+      not_found <- FALSE
+  
+  }
+  if (total >= answer) {
+    
+    data_loop <- data_loop[1:(length(data_loop)-1)]
+    lag <- 1
+    
+  }
+  
+  lag <- lag + 1
+
+  
+}
+
+```
+
+ 
+
 
