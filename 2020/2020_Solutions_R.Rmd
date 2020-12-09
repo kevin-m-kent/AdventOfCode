@@ -254,4 +254,189 @@ data %>%
 
 ```
 
+# Day 7 
+
+```{r}
+data <- read_lines(here::here("2020", "Inputs", "day_7.txt"))  %>%
+  tibble(text = .) %>%
+  separate(text, into = c("type", "contains"), sep = "contain") %>%
+  mutate(contains = str_remove_all(contains, "bags|bag"),
+         type = str_trim(str_remove_all(type, "bags|bag")))
+
+find_parents <- function(data, start_bag) {
+  
+  matches <- which(str_detect(data$contains, start_bag))
+  
+  if (length(matches) > 0) {
+    
+    names(matches) <- matches
+    
+    all <- map(matches, ~ find_parents(data, data$type[.]))
+    
+  }
+  
+all
+ 
+}
+
+parents <- find_parents(data, "shiny gold")
+
+parent_names <- names(unlist(parents)) 
+
+length(unique(unlist(str_split(parent_names, "\\."))))
+
+children_data <- data %>%
+  rename(parent = 1, child = 2) %>%
+  separate_rows(child, sep = ",") %>%
+  mutate(num_bags = as.numeric(str_extract(child, "[0-9]{1}"))) %>%
+  mutate(child = str_trim(str_remove_all(child, "[0-9]|\\."))) %>%
+  drop_na(ch)
+
+children <- children_data$child
+
+names(children) <- children_data$parent
+
+parent_child <- children_data %>%
+group_by(parent) %>%
+  summarise(child = list(child), counts = list(num_bags))
+
+children  <- parent_child$child
+counts  <- parent_child$counts
+
+names(children) <- parent_child$parent
+names(counts) <- parent_child$parent
+
+child_bag_counts <- function(children, counts, string = "shiny gold", total = 0) {
+  
+  if (!string %in% names(counts)) {
+    
+    total
+    
+  }
+  
+    else  {
+        
+      total <- total + prod(as.numeric(unlist((counts[string]))))*length(counts[string])
+      
+      
+      
+      map(children[string], ~ function(result) if (is.null(.)) {
+        
+        total
+      } 
+      
+      else {
+        
+        child_bag_counts(children, counts, string = ., total = total)
+      })
+        
+        
+        
+              
+    }
+  
+}
+  
+  
+test <- child_bag_counts(children, counts)
+
+child_bag_counts(children_data)
+
+```
+
+# Day 8
+
+```{r}
+library(here)
+library(tidyverse)
+
+data <- read_lines(here::here("2020", "Inputs", "day_8.txt"))
+
+find_infinite <- function(data, accum = 0, location = 1, visited = c()) {
+  reached_end <- FALSE
+  while (length(visited) == (length(unique((visited))))) {
+    start_location <- location
+    command <- str_extract(data[location], "^[a-z]{3}")
+    num <- str_extract(data[location], "(\\+|-)[0-9]+")
+    
+    if (command == "jmp") {
+    
+      num <- parse(text=paste0(location, num))
+      location <- eval(num)
+    }
+    
+    if (command == "acc") {
+      
+      num <- parse(text=paste0(accum, num))
+      accum <- eval(num)
+      location <- location + 1
+    }
+    
+    if (command == 'nop') {
+
+      location <- location + 1
+      
+    }
+    
+      visited <- c(visited, location)
+    
+       if (start_location == (length(data))) {
+     print("reached end")
+         reached_end <- TRUE
+     
+     break
+   }
+     
+    
+  }
+
+   list(accum, visited, reached_end)
+   
+
+  
+}
+
+
+# part 1
+
+result_1 <- find_infinite(data)
+  
+
+```
+
+```{r}
+
+jmp_to_nop <- function(string) {
+  
+  str_replace(string, "jmp", "nop")
+  
+}
+
+nop_to_jmp <- function(string) {
+  
+  str_replace(string, "nop", "jmp")
+  
+}
+
+i = 1
+found <- FALSE 
+all_jmps <- which(str_detect(data, "jmp"))
+all_nops <- which(str_detect(data, "nop"))
+
+while (found == FALSE & i <= length(all_nops)) {
+  data_mod <- data
+  data_mod[all_nops[i]] <- nop_to_jmp(data_mod[all_nops[i]])
+  result <- find_infinite(data_mod)
+  found <- result[[3]]
+  i= i + 1
+}
+
+while (found == FALSE & i <= length(all_jmps)) {
+  data_mod <- data
+  data_mod[all_jmps[i]] <- jmp_to_nop(data_mod[all_jmps[[i]]])
+  result <- find_infinite(data_mod)
+  found <- result[[3]]
+  i= i + 1
+}
+```
 
