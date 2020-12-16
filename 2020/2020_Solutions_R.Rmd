@@ -501,14 +501,13 @@ data_df <- tibble(data = data)
 
 not_found = TRUE
 
-lag_additions <- function(data, number) {
+lag_additions <- function(data, lag) {
   
-  start <- length(data) - number
+  start <- length(data) - lag
   
   sum(data[start:length(data)])
   
 }
-
 
 data_loop <- data
 
@@ -531,7 +530,7 @@ while (not_found)  {
       not_found <- FALSE
   
   }
-  if (total >= answer) {
+  if (total > answer) {
     
     data_loop <- data_loop[1:(length(data_loop)-1)]
     lag <- 1
@@ -545,6 +544,523 @@ while (not_found)  {
 
 ```
 
+## Day 10
+
+### Part 1
+
+```{r}
+
+pad_vct <- function(data_vct) {
+  
+  
+  data_vct <- sort(as.numeric(data_vct))
+  
+  tibble(data =c(0, data_vct, data_vct[length(data_vct)] +3))
+  
+}
+
+data_raw <- pad_vct(read_lines(here::here("2020", "Inputs", "day_10.txt")))
+
+data <- data_raw %>%
+  mutate(data_lag = lag(data)) %>%
+  mutate(diff = data - data_lag)
  
+data %>%
+  count(diff) 
+
+  prod(result$n, na.rm = TRUE)
+
+
+```
+
+ 
+### Part 2
+
+```{r}
+
+library(igraph)
+library(here)
+library(tidyverse)
+
+options("scipen" = 30)
+
+data_raw <- pad_vct(read_lines(here::here("2020", "Inputs", "day_10_test2.txt")))
+
+possible_pairs_raw <- expand.grid(data_raw$data, data_raw$data) %>%
+  mutate(abs_diff = Var2 - Var1) %>%
+  filter((abs_diff %in% c(1,2, 3))) %>%
+  rename(from = Var1, to = Var2) %>%
+  arrange(from) 
+
+possible_pairs_t <- expand.grid(data_raw$data, data_raw$data) %>%
+  mutate(abs_diff = Var2 - Var1) %>%
+  filter((abs_diff %in% c(1,2, 3))) %>%
+    rename(from = Var1, to = Var2) %>%
+  select(-abs_diff) %>%
+  mutate(present = 1) %>%
+  pivot_wider(names_from = from, values_from = present, values_fill = 0) %>%
+  select(-to)
+
+answer <- possible_pairs_raw %>%
+  count(from) %>%
+  rename(times = n) %>%
+  count(times) %>%
+  mutate(tot = times^n) %>%
+  summarise(sum(tot))
+
+testt <- vertex_counts %>%
+  mutate(idx = row_number()) 
+
+  2*prod(vertex_counts$n[2:nrow(vertex_counts)])
+  mutate(many_more = case_when(
+    (idx > 1) ~ (n - 1),
+    TRUE ~ n
+  )) %>%
+  View()
+
+prod(vertex_counts$n)
+
+pairs_list <- possible_pairs_raw$to
+
+names(pairs_list) <- possible_pairs_raw$from
+
+
+```
+
+```{r}
+
+go_next <- function(key, pairs_list) {
+  
+  if (min(pairs_list[key]) == 197) {
+    
+    1
+    
+  }
+  
+  else {
+    
+        possibilities <- pairs_list[key]
+    
+    
+    if (length(possibilities) > 0){
+      
+      map(possibilities, ~ as.character(.), pairs_list)
+      
+    }
+        
+        else {
+          
+          0
+          
+        }
+  
+    
+  }
+  
+}
+
+
+
+find_path <- function(location, df) {
+  
+  if (location == 116) {
+    
+    1
+  }
+  
+  else {
+    
+    value <- df$to[location]
+    
+    matches <- which(df$from[(location+1):nrow(df)] == value)
+    
+    if (length(matches) > 0) {
+      
+      map(matches, find_path(location, df))
+      
+    }
+    
+    else {
+      
+      0
+      
+    }
+    
+    
+    
+  }
+
+}
+
+possible_pairs <- possible_pairs_raw
+
+count <- 0
+
+```
+
+## Day 11
+
+```{r}
+
+data_raw <-  read_file(here::here("2020", "Inputs", "day_11.txt"))
+
+data_raw_split <- str_remove_all(data_raw, "\n") %>%
+  str_replace_all(., "L", "0") %>%
+  str_replace_all(., "#", "1") %>%
+  str_split(., "")
+
+get_col <- function(seat, ncol) {
+  
+  mod  <- seat%%ncol
+  
+  if (mod == 0) {
+    ncol}
+  
+  else {
+    mod
+    }
+}
+
+checks <- function(seat, layout, ncol) {
+  
+  curr_col <- get_col(seat, ncol)
+  
+  idx <- c(seat + 1, seat + ncol + 1, seat - ncol + 1, seat - 1, seat - ncol - 1, seat + ncol - 1, seat + ncol, seat - ncol)
+  
+  if (curr_col %in%  c(1, ncol)){
+    
+    if (curr_col == 1) idx <- idx[c(1, 2, 3, 7, 8)]
+    if (curr_col == ncol) idx <- idx[c(4, 5, 6, 7, 8)]
+      
+}
+  
+  idx <- idx[which(idx %in% 1:(length(layout)))]
+  
+  layout[idx]
+  
+}
+
+change_status <- function(seat_num, layout, num_col) {
+  
+  if ((layout[[seat_num]] == "0") & all(checks(seat_num, layout, num_col) != "1")) {return("1")}
+  
+  if ((layout[[seat_num]] == "1") & (sum(checks(seat_num, layout, num_col) == "1") >= 4))  {return("0")}
+ 
+  else {return(layout[[seat_num]])}
+  
+  }
+
+prev <- data_raw_split[[1]]
+curr <- data_raw_split[[1]]
+
+should_stop = FALSE
+
+while (!should_stop) {
+  
+  curr <- map_chr(1:length(prev), ~ change_status(., prev, 90))
+  
+  should_stop <- all(curr == prev)
+
+  prev <- curr
+  
+}
+
+sum(prev == "1")
+
+```
+
+```{r}
+
+row_pos <- 10
+col_pos <- 9
+
+mtcars[row_pos, col_pos]
+
+nrow_mtcars <- nrow(mtcars)
+ncol_mtcars <- ncol(mtcars)
+
+avail_rows_up <- function(row) seq(1,(row-1))
+avail_rows_down <- function(row, total_rows) seq(row+1, total_rows)
+avail_cols_right <- function(col, total_cols) seq(col + 1, total_cols)
+avail_cols_left <- function(col) seq(1, col-1)
+
+left_diag_up <- function(row, col) (row - diff)*(col - diff)
+left_diag_down <- function(row, col) (row - diff)*(col - diff)
+
+```
+
+# Day 12
+
+## Part 1
+
+```{r}
+
+library(tidyverse)
+
+data <- tibble(directions =read_lines(here::here("2020", "Inputs", "day_12.txt"))) %>%
+   mutate(step = row_number()) %>%
+  mutate(command = str_extract(directions, "^[A-Z]"),
+         units = as.numeric(str_extract(directions, "[0-9]+"))) %>%
+  mutate(units = case_when(
+    command == 'L'~ -1*units,
+    TRUE ~ units
+  )) %>%
+  mutate(deg = case_when(
+    command %in% c("L", "R") ~ units,
+    TRUE ~ 0
+  )) %>%
+  mutate(deg = case_when(
+    step == 1 ~ 0, 
+    TRUE ~ deg
+  )) %>%
+  mutate(position = case_when(
+    command %in% c("N", "S", "E", "W") ~ units,
+    TRUE ~ NA_real_
+  )) %>%
+  mutate(cummul_dir = cumsum(deg)) %>%
+  mutate(cummul_dir = cummul_dir %% 360)
+
+data %>% 
+  mutate(cummul_dir = case_when(
+    cummul_dir == 0 ~ "E",
+    cummul_dir == 90 ~ "S",
+    cummul_dir == 180 ~ "W",
+    cummul_dir == 270 ~ "N"
+  )) %>%
+  filter(!command %in% c("R", "L")) %>%
+  mutate(command = case_when(
+    command == "F" ~ cummul_dir,
+    TRUE ~ command
+  )) %>%
+  group_by(command) %>%
+  summarise(total_moves = sum(units)) %>%
+  pivot_wider(names_from = "command", values_from = "total_moves") %>%
+  summarise(ans = abs((E-W)) + abs((S - N)))
+
+```
+
+## Part 2
+
+```{r}
+part2_clean <- data %>%
+    filter(!command %in% c("R", "L")) %>%
+  mutate(way_1 = case_when(
+    step == 1 ~ 10,
+    TRUE ~ 0),
+    way_2 = case_when(
+      step == 1 ~ 1,
+    TRUE ~ 0
+    )) %>%
+  mutate(way_deg_1 = cummul_dir,
+         way_deg_2 = (cummul_dir  + 270) %% 360) %>%
+mutate(way_deg_1 = case_when(
+    way_deg_1 == 0 ~ "E",
+    way_deg_1 == 90 ~ "S",
+    way_deg_1 == 180 ~ "W",
+    way_deg_1 == 270 ~ "N"
+  ),
+  way_deg_2 = case_when(
+    way_deg_2 == 0 ~ "E",
+    way_deg_2 == 90 ~ "S",
+    way_deg_2 == 180 ~ "W",
+    way_deg_2 == 270 ~ "N"
+  )) %>%
+  mutate(command_opp = case_when(
+    command == "E" ~ "W",
+    command == "W" ~ "E",
+    command == "N" ~ "S",
+    command == "S" ~ "N"
+  )) %>%
+  mutate(way_1 = case_when(
+    way_deg_1 == command ~ way_1 + units,
+    way_deg_1 == command_opp ~ way_1 - units,
+    TRUE ~ way_1
+  ),
+  way_2 = case_when(
+         way_deg_2 == command ~ way_2 + units,
+    way_deg_2 == command_opp ~ way_2 - units,
+    TRUE ~ way_2)) %>% 
+  mutate(way_1 = cumsum(way_1)) %>%
+  mutate(way_2 = cumsum(way_2)) %>%
+    mutate(way_deg_1 = case_when(
+      way_1 < 0 & way_deg_1 == 'N' ~ 'S',
+            way_1 < 0 & way_deg_1 == 'S' ~ 'N',
+            way_1 < 0 & way_deg_1 == 'E' ~ 'W',
+            way_1 < 0 & way_deg_1 == 'W' ~ 'E',
+      TRUE ~ way_deg_1
+    ),
+        way_deg_2 = case_when(
+      way_2 < 0 & way_deg_2 == 'N' ~ 'S',
+            way_2 < 0 & way_deg_2 == 'S' ~ 'N',
+            way_2 < 0 & way_deg_2 == 'E' ~ 'W',
+            way_2 < 0 & way_deg_2 == 'W' ~ 'E',
+      TRUE ~ way_deg_2
+    )) %>%
+  mutate(way_1 = abs(way_1),
+         way_2 = abs(way_2))
+
+
+```
+    
+```{r}
+part2_res <- part2_clean %>%
+  filter(command == 'F') %>%
+  select(-step, -deg, -position, -command_opp) %>%
+ mutate(way_1 = units*way_1,
+        way_2 = units*way_2) %>%
+  select(way_1, way_2, way_deg_1, way_deg_2) 
+
+bind_rows(part2_res[,c(2,4)], part2_res[,c(1, 3)]) %>%
+  rename(move = way_1, dir = way_deg_1) %>%
+  mutate(dir = case_when(
+    is.na(dir) ~ way_deg_2,
+    TRUE ~ dir
+  ),
+  move = case_when(
+    is.na(move) ~ way_2,
+    TRUE ~ move
+  )) %>%
+  select(dir, move) %>%
+  group_by(dir) %>%
+  summarise(moves = sum(move)) %>%
+  pivot_wider(names_from = "dir", values_from = "moves") %>%
+  summarise(ans = abs((E-W)) + abs((S - N)))
+
+```
+
+# Day 13
+
+## Part 1
+
+```{python}
+
+d13 = open("Inputs/day_13.txt").read().split("\n")
+
+departure = int(d13[0])
+
+buses = [int(bus) for bus in d13[1].split(",") if bus != 'x']
+
+remainders = [departure % bus for bus in buses]
+
+wait_time = [bus - remainder for bus, remainder in zip(buses, remainders)]
+
+min_wait = min(wait_time)
+
+buses_choose = buses[wait_time.index(min(wait_time))]
+
+buses_choose*min_wait
+```
+
+## Part 2
+
+```{python}
+
+bus_ids_all = [bus for bus in d13[1].split(",")]
+
+min_diff = [(int(id),min) for (min, id) in enumerate(bus_ids_all) if id != 'x']
+
+min_diff
+
+def prime_factors(n):
+    i = 2
+    factors = []
+    while i * i <= n:
+        if n % i:
+            i += 1
+        else:
+            n //= i
+            factors.append(i)
+    if n > 1:
+        factors.append(n)
+    return factors
+    
+
+prime_facts = [(prime_factors(num[0]), prime_factors(num[1])) for num in min_diff] 
+
+found = False
+
+i = 0
+
+while not found:
+  i+=1
+  num = 19*i
+  found = (num % 37 == (13)) & (num % 523 == (19))  & (num % 13 == 37)
+
+num
+```
+
+```{r}
+options("scipen" = 20)
+19*(5^2)*(2^2)*271*199*13*7*3*101*11
+```
+
+# Day 15
+
+# Part 1
+
+What is the 2020th number spoken?
+
+```{r}
+
+library(purrr)
+
+starting <- c(1,0,18,10,19,6)
+
+possible_nums <- rep(c(0), 30000000)
+
+update_info <- function(num, num_list, position) {
+  
+  num_list[num + 1] <- position
+  
+  num_list
+  
+}
+
+for (i in 1:(length(starting))) {
+  
+    possible_nums <- update_info(starting[i], possible_nums, i)
+  
+}
+
+last_num <- starting[length(starting)]
+
+last_num_match_pos <- 0
+
+
+for (i in (length(starting)+1):30000000) {
+  
+  if (last_num_match_pos == 0) {
+    
+    last_num <- 0
+    
+    last_num_match_pos <- possible_nums[1]
+    
+    possible_nums[1] <- i
+    
+  }
+  
+  else {
+    
+    last_num <- (i-1) - last_num_match_pos
+    
+    last_num_match_pos <- possible_nums[last_num+1]
+    
+    possible_nums[last_num+1] <- i
+    
+    
+  
+  }
+  
+}
+
+last_num
+
+
+
+
+
+
+```
+
 
 
